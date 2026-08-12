@@ -18,10 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f411xe.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_gpio.h"
 #include "usart.h"
 #include "gpio.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -69,15 +72,48 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#define DEBOUNCE_DELAY_MS 20
+typedef struct _Button_t{
+  GPIO_TypeDef* port;
+  uint16_t pin;
+  uint32_t last_debounce_time;
+  GPIO_PinState last_raw_state;
+  GPIO_PinState stable_state;
+}Button_t;
 
+void Button_Init(Button_t* btn, GPIO_TypeDef* port, uint16_t pin){
+  btn->port= port;
+  btn->pin = pin;
+  btn->last_debounce_time = 0;
+  btn->last_raw_state = HAL_GPIO_ReadPin(port, pin);
+  btn->stable_state = btn->last_raw_state;
+}
+
+bool Button_IsPressed(Button_t* btn) {
+  GPIO_PinState current_raw = HAL_GPIO_ReadPin(btn->port, btn->pin);
+  uint32_t current_time = HAL_GetTick();
+  if(current_raw != btn->last_raw_state) {
+    btn->last_debounce_time = current_time;
+    btn->last_raw_state = current_raw;
+  }
+
+  if((current_time - btn->last_debounce_time) >= DEBOUNCE_DELAY_MS) {
+    if(btn->stable_state == GPIO_PIN_RESET) 
+      return true;
+    else return false;
+  }
+
+  return false;
+}
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+* @brief  The application entry point.
+* @retval int
+*/
 int main(void)
 {
+  Button_t my_button;
 
   /* USER CODE BEGIN 1 */
 
@@ -96,9 +132,9 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  
   /* USER CODE END SysInit */
-
+  
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
@@ -112,38 +148,39 @@ int main(void)
   // GPIOA_MODER |= (1u<<10);
   // // *(volatile unsigned int*)(0x40020000 + 0x00) &=~(3u<<10);
   // // *(volatile unsigned int*)(0x40020000 + 0x00) |= (1u<<10);
-
+  
   // // push pull
   // GPIOA_OTYPER &=~(1u<<5);
   // // *(volatile unsigned int*)(0x40020000 + 0x04) &=~(1u<<5);
-
-
+  
+  
   // // PB0 클럭 인가방법
   // // 0번핀 출력으로 만드는법
   // // PB0 에 대해서 RCC설정, MODER설정, PUSHPULL설정, toggle프로그램 추가
   // // GPIOB 주소 시작위치 0x4002 0400
   // // 클럭 0x30 B0 위치 0
-
+  
   // // GPIOB 클럭 활성화 -> RCC_AHB1ENR의 주소에 1을 왼쪽으로 1만큼 움직여서 1로 변환
   // RCC_AHB1ENR |= (1u<<1);
-
+  
   // // GPIOB_MODER -> GPIOB_MODER주소에있는 값을 0으로 초기화 후 01로 만들어서 활성화
   // GPIOB_MODER &=~(3u<<0);
   // GPIOB_MODER |= (1u<<0);
-
+  
   // // push pull
   // GPIOB_OTYPER &=~(1u<<0);
-
-
-
-
-
+  
+  
+  
+  
+  
   /* USER CODE END 2 */
-
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    Button_Init(&my_button, GPIOC, GPIO_PIN_0);
     // GPIA_ODR ^= (1u<<5);
     // GPIB_ODR ^= (1u<<0);
     
@@ -153,16 +190,21 @@ int main(void)
     if (button == GPIO_PIN_RESET) {
       HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  
     }
-
-    GPIO_PinState button1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
-    if (button1 == GPIO_PIN_RESET) {
-      HAL_Delay(50);
-      button1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
-      if (button1 == GPIO_PIN_RESET) {
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-      }
-    }
-    /* USER CODE END WHILE */
+    
+    // GPIO_PinState button1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
+    // if (button1 == GPIO_PIN_RESET) {
+      //   HAL_Delay(50);
+      //   button1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
+      //   if (button1 == GPIO_PIN_RESET) {
+        //     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+        //   }
+        
+        if(Button_IsPressed(&my_button)) {
+          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+        }
+        
+        
+        /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
