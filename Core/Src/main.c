@@ -26,7 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
+#include <string.h>
 #ifdef __GNUC__
   #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #else
@@ -39,9 +39,10 @@ PUTCHAR_PROTOTYPE
   HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
   return ch;
 }
-
+#define RX_BUF_SIZE 128
 uint8_t rx_data;
-
+uint8_t rx_buf1[RX_BUF_SIZE];
+uint8_t rx_buf2[RX_BUF_SIZE];
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +52,6 @@ uint8_t rx_data;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 
 /* USER CODE END PD */
 
@@ -76,23 +76,55 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-  if(GPIO_Pin == GPIO_PIN_13) {
+
+  if(GPIO_Pin==GPIO_PIN_13){
     HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
   }
-
-  else if(GPIO_Pin == GPIO_PIN_0) {
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-  }
 }
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if(huart -> Instance == USART2) {
-    if(rx_data == 'a')
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+  if(huart->Instance==USART2){
+    if(rx_data=='a')
       printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
     else
-      HAL_UART_Transmit(&huart2, &rx_data, 1,10);
+      HAL_UART_Transmit(&huart2, rx_buf2, RX_BUF_SIZE, 100);
 
-    HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buf2, RX_BUF_SIZE);
   }
+}
+
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+  if(huart->Instance==USART1){ // 받으면
+    if(rx_data=='a')
+      printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
+    else
+      HAL_UART_Transmit(&huart2, rx_buf1, Size, 100); //2로 넘어와?
+
+    HAL_UART_DMAStop(&huart1);
+    memset(rx_buf1,0,Size);
+    
+  }
+  
+  if (huart->Instance==USART2){ // 보내면
+    if(rx_data=='a')
+    printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
+    else
+      HAL_UART_Transmit(&huart1, rx_buf2, Size, 100);
+
+    HAL_UART_DMAStop(&huart2);
+    memset(rx_buf2,0,Size);
+  }
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buf1, RX_BUF_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buf2, RX_BUF_SIZE);
+
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+  HAL_UART_Receive_DMA(&huart2, rx_buf1, RX_BUF_SIZE);
+  HAL_UART_Receive_DMA(&huart2, rx_buf2, RX_BUF_SIZE);
 }
 
 
@@ -107,7 +139,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  
 
   /* USER CODE END 1 */
 
@@ -124,22 +155,26 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+ //HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buf2, RX_BUF_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buf1, RX_BUF_SIZE);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
