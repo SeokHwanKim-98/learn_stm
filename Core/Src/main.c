@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -38,6 +39,9 @@ PUTCHAR_PROTOTYPE
   HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
   return ch;
 }
+
+uint8_t rx_data;
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -80,6 +84,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
   }
 }
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  if(huart -> Instance == USART2) {
+    if(rx_data == 'a')
+      printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
+    else
+      HAL_UART_Transmit(&huart2, &rx_data, 1,10);
+
+    HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+  }
+}
+
 
 
 /* USER CODE END 0 */
@@ -114,22 +129,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  
-  uint8_t rx_data;
+  HAL_UART_Receive_IT(&huart2, &rx_data, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (HAL_UART_Receive(&huart2, &rx_data,1, 10) == HAL_OK) {
-      if (rx_data == 'a')
-      printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
-      else
-        HAL_UART_Transmit(&huart2, &rx_data, 1, 10);
-    }
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
