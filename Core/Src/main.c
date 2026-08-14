@@ -97,7 +97,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-  if(huart->Instance==USART1){ // 받으면
+  if(huart->Instance==USART1){ 
     if(rx_data=='a')
       printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
     else
@@ -108,18 +108,17 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     
   }
   
-  if (huart->Instance==USART2){ // 보내면
+  if (huart->Instance==USART2){ 
     if(rx_data=='a')
     printf("Hello STM32 Cortex-M4 USART Polling!\r\n");
-    else
-      HAL_UART_Transmit(&huart1, rx_buf2, Size, 100);
+  else
+  HAL_UART_Transmit(&huart1, rx_buf2, Size, 100);
 
-    HAL_UART_DMAStop(&huart2);
-    memset(rx_buf2,0,Size);
+  HAL_UART_DMAStop(&huart2);
+  memset(rx_buf2,0,Size);
   }
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rx_buf1, RX_BUF_SIZE);
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buf2, RX_BUF_SIZE);
-
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
