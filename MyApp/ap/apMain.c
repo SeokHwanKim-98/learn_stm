@@ -5,13 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 
-
-void apInit(void) {
-  uartInit();
+void apInit(void){
+    uartInit();
 }
 
-void apMain(void) {
-  while(1) {
+void apMain(void){
+    while(1){
 
-  }
+    }
 }
