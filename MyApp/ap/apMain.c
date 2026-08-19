@@ -1,6 +1,7 @@
 #include "apMain.h"
 #include "myAdc.h"
 #include "myUart.h"
+#include "myTim.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_adc.h"
 
@@ -11,9 +12,11 @@
 
 extern ADC_HandleTypeDef hadc1;
 
+
 void apInit(void) { 
-  uartInit();
-  adcInit();
+  // uartInit();
+  // adcInit();
+  myTim_Init();
 }
 
 float internal_temp =0;
@@ -21,8 +24,11 @@ float internal_temp =0;
 void apMain(void) {
 
   while (1) {
-    adcUpdate();
-    internal_temp = adcGetTemp();
-    HAL_Delay(10);
+    HCSR04_Trigger();
+
+    HAL_Delay(100);
+
+
+    // HAL_Delay(100);
   }
 }
