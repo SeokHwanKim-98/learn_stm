@@ -17,7 +17,12 @@
                 {
                     "imageFileName": "${command:st-stm32-ide-debug-launch.get-projects-binary-from-context1}"
                 }
-            ]
+            ],
+            // 실시간 확인용
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": "4"
+            }
         }
     ]
 }
