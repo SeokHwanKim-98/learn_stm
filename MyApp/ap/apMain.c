@@ -26,9 +26,11 @@ void apMain(void) {
   while (1) {
     HCSR04_Trigger();
 
-    HAL_Delay(100);
+    HAL_Delay(60);
 
+    printf(">distance : %.2f\r\n", distance);
+    printf("distance : %.2f cm\r\n", distance);
 
-    // HAL_Delay(100);
+    // HAL_Delay(1000);
   }
 }
