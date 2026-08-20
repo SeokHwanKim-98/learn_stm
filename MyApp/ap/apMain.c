@@ -3,22 +3,26 @@
 #include "myUart.h"
 #include "myTim.h"
 #include "myDht11.h"
+#include "myI2c.h"
+#include "myLcd1602.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_adc.h"
 
 
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 extern ADC_HandleTypeDef hadc1;
 
 
 void apInit(void) { 
-  // uartInit();
+  uartInit();
   // adcInit();
-  // myTim_Init();
+  myTim_Init();
   dht11Init();
+  i2cScan();
+  lcd1602Init();
+
 }
 
 float internal_temp =0;
@@ -27,13 +31,19 @@ bool dht_status = false;
 
 void apMain(void) {
 
+  lcd1602Clear();
+  lcd1602Cursor(0, 0);
+  lcd1602Print("Hello LCD!");
   while (1) {
     // adcUpdate();
 
     dht_status = dht11Read(&dht_data);
     
-    // HCSR04_Trigger();
-    // printf(">distance : %.2f\r\n", distance);
+    HCSR04_Trigger();
+    lcd1602Clear();
+    lcd1602Cursor(1, 0);
+    lcd1602Printf("Distance:%.2f",distance);
+    printf(">distance : %.2f\r\n", distance);
     // printf("distance : %.2f cm\r\n", distance);
     
     HAL_Delay(10);
