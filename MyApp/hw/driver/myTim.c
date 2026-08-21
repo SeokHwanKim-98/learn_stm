@@ -87,6 +87,16 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
             //        echo_time,
             //        distance);
 
+            // 거리에 따른 led점등
+            if (distance > 50) {
+                // 거리가 50보다 크면 pbo를 low로 만들어서 안켜지게
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+            }
+            else {
+                // 50보다 작으면 pbo를 high로 만들어서 켜지게
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+            }
+
             capture_state = 0;
 
             // 다시 Rising Edge

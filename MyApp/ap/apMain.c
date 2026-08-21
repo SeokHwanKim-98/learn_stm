@@ -14,6 +14,7 @@
 
 extern ADC_HandleTypeDef hadc1;
 
+int time = 0;
 
 void apInit(void) { 
   uartInit();
@@ -30,22 +31,31 @@ dht11Data_t dht_data = {0};
 bool dht_status = false;
 
 void apMain(void) {
+  lcdOpen();
 
-  lcd1602Clear();
-  lcd1602Cursor(0, 0);
-  lcd1602Print("Hello LCD!");
   while (1) {
     // adcUpdate();
-
+    
     dht_status = dht11Read(&dht_data);
     
     HCSR04_Trigger();
+
     lcd1602Clear();
-    lcd1602Cursor(1, 0);
+    if (time < 10) {
+      lcd1602Cursor(0, 0);
+      lcd1602Printf("Temperature:%.1f",dht_data.temperature);
+    }
+    else {
+      lcd1602Cursor(0, 1);
+      lcd1602Printf("Humidity:%.2f",dht_data.humidity);
+      if (time > 20) { time = 0; }
+    }
+    lcd1602Cursor(1, 1);
     lcd1602Printf("Distance:%.2f",distance);
     printf(">distance : %.2f\r\n", distance);
     // printf("distance : %.2f cm\r\n", distance);
     
-    HAL_Delay(10);
+    time++;
+    HAL_Delay(350);
   }
 }

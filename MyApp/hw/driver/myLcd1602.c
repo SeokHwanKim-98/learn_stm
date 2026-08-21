@@ -116,7 +116,7 @@ void lcd1602Clear(void) {
 }
 
 void lcd1602Cursor(uint8_t row, uint8_t col) {
-    uint8_t addr =(row == 0) ? (0x00+col) : (0x40+col);
+    uint8_t addr = (row == 0) ? (0x00+col) : (0x40+col);
     lcd1602SendCommand(0x80+addr);
 }
 
@@ -133,4 +133,25 @@ void lcd1602Printf(const char *fmt, ...) {
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
     lcd1602Print(buf);
+}
+
+void lcd1602Printfd(const char *fmt, ...) {
+    char buf[33];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    lcd1602Print(buf);
+    HAL_Delay(300);
+}
+
+void lcdOpen() {
+    
+  lcd1602Clear();
+  lcd1602Cursor(0, 3);
+  lcd1602Print("Hello LCD!");
+  lcd1602Cursor(1, 1);
+  lcd1602Print("Welcome Aboard");
+  HAL_Delay(3000);
+
 }
