@@ -3,7 +3,7 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_def.h"
 #include "stm32f4xx_hal_i2c.h"
-#include <stdint.h>
+// #include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 
