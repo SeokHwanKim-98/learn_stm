@@ -105,6 +105,38 @@ static const uint8_t font6x8[][6] = {
   { 0x08, 0x08, 0x2A, 0x1C, 0x08, 0x00 }  // '~'
 };
 
+static const uint8_t icon6x8[][6] = {
+    // 0: 빈 하트 ♡
+    { 0x0C, 0x12, 0x21, 0x12, 0x0C, 0x00 },
+
+    // 1: 다이아몬드 ◆
+    { 0x08, 0x14, 0x22, 0x14, 0x08, 0x00 },
+
+    // 2: 해 ☀
+    { 0x12, 0x0C, 0x1E, 0x1E, 0x0C, 0x12 },
+
+    // 3: 눈 👁
+    { 0x0C, 0x12, 0x21, 0x21, 0x12, 0x0C },
+
+    // 4: 사람
+    { 0x00, 0x0C, 0x12, 0x7E, 0x10, 0x00 },
+
+    // 5: 집
+    { 0x10, 0x08, 0x3C, 0x7E, 0x3C, 0x00 },
+
+    // 6: 자동차
+    { 0x18, 0x24, 0x7E, 0x24, 0x18, 0x00 },
+
+    // 7: 배터리
+    { 0x3E, 0x22, 0x22, 0x22, 0x3E, 0x08 },
+
+    // 8: 와이파이
+    { 0x01, 0x1D, 0x15, 0x15, 0x1D, 0x01 },
+
+    // 9: 잠금 🔒
+    { 0x1C, 0x22, 0x7F, 0x7F, 0x22, 0x1C }
+};
+
 static void writeCommand(uint8_t cmd) {
     HAL_I2C_Mem_Write(&hi2c1, SSD1306_I2C_ADDR, 0x00, 1, &cmd, 1, 10);
 }
@@ -190,7 +222,7 @@ bool ssd1306Init(void)
 
 
 void ssd1306DrawPixel(int16_t x, int16_t y, uint8_t color) {
-    if ( x < 0 || x >= SSD1306_HEIGHT || y < 0 || y >= SSD1306_HEIGHT) {
+    if ( x < 0 || x >= SSD1306_WIDTH || y < 0 || y >= SSD1306_HEIGHT) {
         return;
     }
 
@@ -263,10 +295,47 @@ void ssd1306DrawChar(int16_t x, int16_t y, char ch, uint8_t color) {
     }
 }
 
+void ssd1306DrawIcon(int16_t x, int16_t y, char ch, uint8_t color) {
+    if(ch< 0 || ch > 10) {
+        return;
+    }
+    uint8_t index = ch - 0;
+    for (uint8_t i = 0; i < 6; i++) {
+        uint8_t line = icon6x8[index][i];
+        for (uint8_t j = 0; j < 8; j++) {
+            if (line & (1<<j)) {
+                ssd1306DrawPixel(x+i, y+j, color);
+            }
+            else {
+                ssd1306DrawPixel(x+i, y+j, !color);
+            }
+        }
+    }
+}
+
 void ssd1306DrawString(int16_t x, int16_t y, const char *str, uint8_t color) {
     while(*str) {
         ssd1306DrawChar(x, y, *str, color);
         x += 6;
         str++;
     }
+}
+
+void ssd1306Printf(int16_t x, int16_t y, uint8_t color, const char *fmt, ...) {
+    char buf[64];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    ssd1306DrawString(x,y, buf, color);
+}
+
+// badapple용
+void ssd1306DrawFrame(const uint8_t *frame)
+{
+    memcpy(
+        ssd1306_buffer,
+        frame,
+        SSD1306_WIDTH * SSD1306_HEIGHT / 8
+    );
 }

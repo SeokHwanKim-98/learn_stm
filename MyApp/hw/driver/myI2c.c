@@ -4,6 +4,7 @@
 #include "stm32f4xx_hal_i2c.h"
 #include <stdint.h>
 #include <sys/types.h>
+#include <stdio.h>
 
 void i2cInit(void) {
 

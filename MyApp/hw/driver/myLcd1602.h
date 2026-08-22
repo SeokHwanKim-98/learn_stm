@@ -12,7 +12,6 @@ void lcd1602Clear(void);
 void lcd1602Cursor(uint8_t row, uint8_t col);
 void lcd1602Print(const char *str);
 void lcd1602Printf(const char *fmt, ...);
-void lcd1602Printfd(const char *fmt, ...);
 void lcd1602Backlight(bool on);
 
 

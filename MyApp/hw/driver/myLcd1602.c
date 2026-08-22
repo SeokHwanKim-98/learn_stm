@@ -135,16 +135,6 @@ void lcd1602Printf(const char *fmt, ...) {
     lcd1602Print(buf);
 }
 
-void lcd1602Printfd(const char *fmt, ...) {
-    char buf[33];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    lcd1602Print(buf);
-    HAL_Delay(300);
-}
-
 void lcdOpen() {
     
   lcd1602Clear();

@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 
 #define SSD1306_I2C_ADDR (0x3C << 1) // 0x78
@@ -24,5 +26,11 @@ void ssd1306DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col
 void ssd1306DrawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color);
 void ssd1306FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color);
 void ssd1306DrawChar(int16_t x, int16_t y, char ch, uint8_t color);
+void ssd1306DrawIcon(int16_t x, int16_t y, char ch, uint8_t color);
 void ssd1306DrawString(int16_t x, int16_t y, const char *str, uint8_t color);
+void ssd1306Printf(int16_t x, int16_t y, uint8_t color, const char *fmt, ...);
 void ssd1306Test(void);
+
+
+// badapple용
+void ssd1306DrawFrame(const uint8_t *frame);
